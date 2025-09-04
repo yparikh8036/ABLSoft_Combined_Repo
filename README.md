@@ -25,13 +25,21 @@ This is a **Full-Stack Application** to upload and view invoice records. The app
 
 The CSV file used for uploading invoices must follow this format:
 
-customerId;invoiceNum;date;description;amount
-101;5001;2025-09-01;Website development;1500
-102;5002;2025-09-02;Mobile app design;2500
-103;5003;2025-09-03;Cloud hosting services;1200
-104;5004;2025-09-03;Consulting session;800
-105;5005;2025-09-03;Annual subscription;3000
+- customerId;invoiceNum;date;description;amount
+- 101;5001;2025-09-01;Website development;1500
+- 102;5002;2025-09-02;Mobile app design;2500
+- 103;5003;2025-09-03;Cloud hosting services;1200
+- 104;5004;2025-09-03;Consulting session;800
+- 105;5005;2025-09-03;Annual subscription;3000
 
+---
+
+### Notes:
+- **Customer ID:** Unique identifier for the customer  
+- **Invoice Number:** Unique invoice reference  
+- **Invoice Date:** Format `YYYY-MM-DD`  
+- **Description:** Brief description of the invoice  
+- **Amount:** Invoice amount in decimal format 
 
 ---
 
