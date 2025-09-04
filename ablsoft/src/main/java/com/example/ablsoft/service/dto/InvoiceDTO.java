@@ -22,6 +22,8 @@ public class InvoiceDTO {
     @NotNull
     private Float amount;
 
+    private Long invoiceAge;
+
     public InvoiceDTO() {
     }
 
@@ -75,6 +77,14 @@ public class InvoiceDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getInvoiceAge() {
+        return invoiceAge;
+    }
+
+    public void setInvoiceAge(Long invoiceAge) {
+        this.invoiceAge = invoiceAge;
     }
 
     @Override

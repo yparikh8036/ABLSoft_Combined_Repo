@@ -55,27 +55,6 @@ public class InvoiceResource {
     }
 
     /**
-     * Updates an existing Invoice record.
-     *
-     * Requirements:
-     * - The DTO must contain a non-null id.
-     *
-     * @param invoiceDTO the payload containing updated fields and an id
-     * @return 200 OK with the persisted DTO after update
-     * @throws Exception when id is missing
-     */
-    @PutMapping("/upload-file")
-    public ResponseEntity<InvoiceDTO> update(@RequestBody @Valid InvoiceDTO invoiceDTO) throws Exception {
-        log.debug("REST request to update Invoice : {}", invoiceDTO);
-
-        if (invoiceDTO.getId() == null) {
-            throw new Exception("A updated Invoice should have an ID");
-        }
-        InvoiceDTO result = invoiceService.save(invoiceDTO);
-        return ResponseEntity.ok(result);
-    }
-
-    /**
      * Lists all Invoice records.
      *
      * @return array of InvoiceDTO
@@ -84,18 +63,6 @@ public class InvoiceResource {
     public List<InvoiceDTO> getAllFiles() {
         log.debug("REST request to get all Invoices");
         return invoiceService.findAll();
-    }
-
-    /**
-     * Retrieves a single Invoice by its id.
-     *
-     * @param fileId primary key of the record
-     * @return 200 OK with the DTO
-     */
-    @GetMapping("/files/{fileId}")
-    public ResponseEntity<InvoiceDTO> getFileById(@PathVariable Long fileId) {
-        log.debug("Request to get file By Id : {}", fileId);
-        return ResponseEntity.ok(invoiceService.findById(fileId));
     }
 
     /**

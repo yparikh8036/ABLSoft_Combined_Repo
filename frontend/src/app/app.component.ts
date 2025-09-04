@@ -27,11 +27,7 @@ export class AppComponent {
   loadInvoices() {
     this.invoiceService.getInvoices().subscribe({
       next: (data) => {
-        const withAge = data.map((inv) => ({
-          ...inv,
-          invoiceAge: this.calculateAge(inv.date),
-        }));
-        this.invoices = withAge;
+        this.invoices = data;
       },
       error: (err) => console.error('Error loading invoices', err),
     });
@@ -42,12 +38,7 @@ export class AppComponent {
     if (file) {
       this.invoiceService.uploadCsv(file).subscribe({
         next: (data) => {
-          const savedData = data.map((inv) => ({
-            ...inv,
-            invoiceAge: this.calculateAge(inv.date),
-          }));
-
-          this.invoices.concat(savedData);
+          this.invoices.concat(data);
         },
         error: (error) => {
           console.error('Error uploading file', error);
@@ -57,12 +48,5 @@ export class AppComponent {
         },
       });
     }
-  }
-
-  calculateAge(dateStr: string): number {
-    const today = new Date();
-    const invoiceDate = new Date(dateStr);
-    const diff = today.getTime() - invoiceDate.getTime();
-    return Math.floor(diff / (1000 * 60 * 60 * 24));
   }
 }

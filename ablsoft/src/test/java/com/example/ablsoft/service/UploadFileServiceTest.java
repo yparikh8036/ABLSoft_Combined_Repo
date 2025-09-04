@@ -3,8 +3,6 @@ package com.example.ablsoft.service;
 import com.example.ablsoft.domain.Invoice;
 import com.example.ablsoft.repository.InvoiceRepo;
 import com.example.ablsoft.service.dto.InvoiceDTO;
-import com.example.ablsoft.service.errors.ErrorConstants;
-import com.example.ablsoft.service.errors.GlobalException;
 import com.example.ablsoft.service.mapper.InvoiceMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,12 +12,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -53,7 +49,7 @@ class UploadFileServiceTest {
         dto.setId(1L);
         dto.setCustomerId("101");
         dto.setInvoiceNum("5001");
-        dto.setDate("2025-09-01T10:30:00Z");
+        dto.setDate("2025-09-01");
         dto.setDescription("Website development");
         dto.setAmount(1500f);
     }
@@ -64,14 +60,14 @@ class UploadFileServiceTest {
         InvoiceDTO create = new InvoiceDTO();
         create.setCustomerId("102");
         create.setInvoiceNum("6001");
-        create.setDate("2025-09-02T14:15:00Z");
+        create.setDate("2025-09-02");
         create.setDescription("Design");
         create.setAmount(2500f);
 
         Invoice entityToSave = new Invoice();
         entityToSave.setCustomerId("102");
         entityToSave.setInvoiceNum("6001");
-        entityToSave.setDate("2025-09-02T14:15:00Z");
+        entityToSave.setDate("2025-09-02");
         entityToSave.setDescription("Design");
         entityToSave.setAmount(2500f);
 
@@ -79,7 +75,7 @@ class UploadFileServiceTest {
         savedEntity.setId(10L);
         savedEntity.setCustomerId("102");
         savedEntity.setInvoiceNum("6001");
-        savedEntity.setDate("2025-09-02T14:15:00Z");
+        savedEntity.setDate("2025-09-02");
         savedEntity.setDescription("Design");
         savedEntity.setAmount(2500f);
 
@@ -87,7 +83,7 @@ class UploadFileServiceTest {
         expected.setId(10L);
         expected.setCustomerId("102");
         expected.setInvoiceNum("6001");
-        expected.setDate("2025-09-02T14:15:00Z");
+        expected.setDate("2025-09-02");
         expected.setDescription("Design");
         expected.setAmount(2500f);
 
@@ -115,31 +111,11 @@ class UploadFileServiceTest {
     }
 
     @Test
-    @DisplayName("findById returns mapped DTO when found")
-    void findById_found() {
-        when(invoiceRepo.findById(1L)).thenReturn(Optional.of(entity));
-        when(invoiceMapper.toDto(entity)).thenReturn(dto);
-
-        InvoiceDTO result = invoiceService.findById(1L);
-
-        assertEquals(dto, result);
-    }
-
-    @Test
-    @DisplayName("findById throws when not found")
-    void findById_notFound() {
-        when(invoiceRepo.findById(99L)).thenReturn(Optional.empty());
-
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> invoiceService.findById(99L));
-        assertTrue(ex.getMessage().contains("Post Not by id"));
-    }
-
-    @Test
     @DisplayName("uploadAndSave parses CSV, filters duplicates, saves non-duplicates and maps")
     void uploadAndSave_success_filtersDuplicates() {
         String csv = "customerId,invoiceNum,date,description,amount\n" +
-                "101,5001,2025-09-01T10:30:00Z,Website development,1500\n" +
-                "102,5002,2025-09-02T14:15:00Z,Mobile app design,2500\n";
+                "101,5001,2025-09-01,Website development,1500\n" +
+                "102,5002,2025-09-02,Mobile app design,2500\n";
         MockMultipartFile file = new MockMultipartFile(
                 "file", "invoices.csv", "text/csv", csv.getBytes(StandardCharsets.UTF_8));
 
@@ -155,7 +131,7 @@ class UploadFileServiceTest {
         saved.setId(200L);
         saved.setCustomerId("102");
         saved.setInvoiceNum("5002");
-        saved.setDate("2025-09-02T14:15:00Z");
+        saved.setDate("2025-09-02");
         saved.setDescription("Mobile app design");
         saved.setAmount(2500f);
 
@@ -179,7 +155,7 @@ class UploadFileServiceTest {
     @DisplayName("uploadAndSave throws on malformed CSV (non-numeric amount)")
     void uploadAndSave_malformedCsv_throws() {
         String badCsv = "customerId,invoiceNum,date,description,amount\n" +
-                "101,5001,2025-09-01T10:30:00Z,Website development,abc\n";
+                "101,5001,2025-09-01,Website development,abc\n";
         MockMultipartFile file = new MockMultipartFile(
                 "file", "invoices.csv", "text/csv", badCsv.getBytes(StandardCharsets.UTF_8));
 
@@ -192,7 +168,7 @@ class UploadFileServiceTest {
     @DisplayName("uploadAndSave with semicolon-delimited sample should fail with processing error")
     void uploadAndSave_semicolonSample_fails() {
         String sample = "customerId;invoiceNum;date;description;amount\n" +
-                "101;5001;2025-09-01T10:30:00Z;Website development;1500\n";
+                "101;5001;2025-09-01;Website development;1500\n";
         MockMultipartFile file = new MockMultipartFile(
                 "file", "invoices.csv", "text/csv", sample.getBytes(StandardCharsets.UTF_8));
 

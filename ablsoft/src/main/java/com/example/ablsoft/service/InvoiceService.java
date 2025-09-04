@@ -20,7 +20,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Service layer for managing Invoice entities and CSV import operations.
@@ -52,10 +51,6 @@ public class InvoiceService {
 
     /**
      * Saves an Invoice represented as a DTO.
-     * <p>
-     * The DTO is converted to an entity and delegated to {@link #save(Invoice)}
-     * which enforces duplicate checks and persistence.
-     * </p>
      *
      * @param invoiceDTO the data transfer object containing Invoice fields
      * @return the persisted Invoice converted back to a DTO
@@ -64,23 +59,10 @@ public class InvoiceService {
     public InvoiceDTO save(InvoiceDTO invoiceDTO) {
         log.debug("Request to save upload Invoice DTO : {}", invoiceDTO);
 
-        return save(invoiceMapper.toEntity(invoiceDTO));
-    }
-
-    /**
-     * Saves an Invoice entity after validating it is not a duplicate.
-     *
-     * @param invoice the entity to be persisted
-     * @return the persisted entity mapped to a DTO
-     * @throws GlobalException if an Invoice with the same customerId and invoiceNum already exists
-     */
-    public InvoiceDTO save(Invoice invoice) {
-        log.debug("Request to save Invoice  : {}", invoice);
-
-        if (checkDuplicate(invoice.getCustomerId(), invoice.getInvoiceNum())) {
+        if (checkDuplicate(invoiceDTO.getCustomerId(), invoiceDTO.getInvoiceNum())) {
             throw new GlobalException(ErrorConstants.DUPLICATE_INVOICE_EXCEPTION_MESSAGE, ErrorConstants.DUPLICATE_INVOICE_EXCEPTION_CODE, HttpStatus.BAD_REQUEST);
         }
-
+        Invoice invoice = invoiceMapper.toEntity(invoiceDTO);
         invoice = invoiceRepo.save(invoice);
         return invoiceMapper.toDto(invoice);
     }
@@ -107,20 +89,6 @@ public class InvoiceService {
                 .stream()
                 .map(invoiceMapper::toDto)
                 .toList();
-    }
-
-    /**
-     * Retrieves a single Invoice by its id.
-     *
-     * @param fileId the primary key of the Invoice
-     * @return the corresponding InvoiceDTO
-     * @throws RuntimeException if no record exists for the provided id
-     */
-    public InvoiceDTO findById(Long fileId) {
-        log.debug("Request to get Invoice By Id : {}", fileId);
-        return invoiceRepo.findById(fileId)
-                .map(invoiceMapper::toDto)
-                .orElseThrow(() -> new RuntimeException(String.format("Post Not by id = %s", fileId)));
     }
 
     /**
