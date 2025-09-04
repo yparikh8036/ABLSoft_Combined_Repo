@@ -39,6 +39,7 @@ export class AppComponent {
       this.invoiceService.uploadCsv(file).subscribe({
         next: (data) => {
           this.invoices.concat(data);
+          this.loadInvoices();
         },
         error: (error) => {
           console.error('Error uploading file', error);

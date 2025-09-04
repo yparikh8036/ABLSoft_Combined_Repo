@@ -108,11 +108,18 @@ public class InvoiceService {
 
         List<Invoice> invoices = new ArrayList<>();
 
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+        try {
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
 
-             CSVParser csvParser = new CSVParser(reader,
-                     CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
+            reader.mark(1);
+            String headerLine = reader.readLine();
+            reader.reset();
+
+            char delimiter = getDelimiter(headerLine);
+
+            CSVParser csvParser = new CSVParser(reader,
+                    CSVFormat.newFormat(delimiter).withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
 
             for (CSVRecord csvRecord : csvParser) {
 
@@ -126,10 +133,31 @@ public class InvoiceService {
             }
 
         } catch (Exception e) {
-            throw new GlobalException(ErrorConstants.CSV_PROCESSING_EXCEPTION_MESSAGE, ErrorConstants.CSV_PROCESSING_EXCEPTION_CODE, HttpStatus.BAD_REQUEST);
+            throw new GlobalException(ErrorConstants.CSV_PROCESSING_EXCEPTION_MESSAGE,
+                    ErrorConstants.CSV_PROCESSING_EXCEPTION_CODE, HttpStatus.BAD_REQUEST);
         }
 
         return saveUploadedFiles(invoices);
+    }
+
+    private static char getDelimiter(String headerLine) {
+        if (headerLine == null || headerLine.isEmpty()) {
+            throw new GlobalException(ErrorConstants.CSV_PROCESSING_NULL_HEADER_EXCEPTION_MESSAGE,
+                    ErrorConstants.CSV_PROCESSING_NULL_HEADER_EXCEPTION_CODE, HttpStatus.BAD_REQUEST);
+        }
+
+        char delimiter;
+        if (headerLine.contains("\t")) {
+            delimiter = '\t'; // Tab
+        } else if (headerLine.contains(",")) {
+            delimiter = ',';  // Comma
+        } else if (headerLine.contains(";")) {
+            delimiter = ';';  // Semicolon
+        } else {
+            throw new GlobalException(ErrorConstants.CSV_PROCESSING_NO_DELIMITER_EXCEPTION_MESSAGE,
+                    ErrorConstants.CSV_PROCESSING_NO_DELIMITER_EXCEPTION_CODE, HttpStatus.BAD_REQUEST);
+        }
+        return delimiter;
     }
 
     /**

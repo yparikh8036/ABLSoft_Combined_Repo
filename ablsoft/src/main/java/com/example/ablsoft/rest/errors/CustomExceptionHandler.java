@@ -41,9 +41,9 @@ public class CustomExceptionHandler {
         return new ResponseEntity<>(new CustomExceptionVM(ERROR_MESSAGE, ErrorConstants.DATA_ACCESS_EXCEPTION_CODE, HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(SQLException.class)
-    public ResponseEntity<CustomExceptionVM> sqlExceptionHandler(DataIntegrityViolationException e) {
-        log.error("SQLException | DataIntegrityViolationException Occurred", e);
+    @ExceptionHandler({SQLException.class, DataIntegrityViolationException.class})
+    public ResponseEntity<CustomExceptionVM> sqlExceptionHandler(DataIntegrityViolationException e, SQLException e1) {
+        log.error("SQLException | DataIntegrityViolationException Occurred : {}", e, e1);
         return new ResponseEntity<>(new CustomExceptionVM(ERROR_MESSAGE, ErrorConstants.SQL_EXCEPTION_CODE, HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

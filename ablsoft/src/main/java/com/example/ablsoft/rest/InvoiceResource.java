@@ -2,9 +2,12 @@ package com.example.ablsoft.rest;
 
 import com.example.ablsoft.service.InvoiceService;
 import com.example.ablsoft.service.dto.InvoiceDTO;
+import com.example.ablsoft.service.errors.ErrorConstants;
+import com.example.ablsoft.service.errors.GlobalException;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,7 +51,8 @@ public class InvoiceResource {
     public ResponseEntity<InvoiceDTO> upload(@RequestBody @Valid InvoiceDTO invoiceDTO) throws Exception {
         log.debug("REST request to save Invoice : {}", invoiceDTO);
         if (invoiceDTO.getId() != null) {
-            throw new Exception("A new Invoice cannot already have an ID");
+            throw new GlobalException(ErrorConstants.NEW_INVOICE_ID_EXCEPTION_MESSAGE,
+                    ErrorConstants.NEW_INVOICE_ID_EXCEPTION_CODE, HttpStatus.BAD_REQUEST);
         }
         InvoiceDTO result = invoiceService.save(invoiceDTO);
         return ResponseEntity.ok(result);
@@ -76,9 +80,10 @@ public class InvoiceResource {
      */
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
     public ResponseEntity<List<InvoiceDTO>> uploadFile(@RequestParam("file") MultipartFile file) {
-        log.debug("Request to get Invoice : {}", file.getName());
+        log.debug("Request to upload Invoice : {}", file.getName());
         if (file.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            throw new GlobalException(ErrorConstants.CSV_PROCESSING_EMPTY_FILE_EXCEPTION_MESSAGE,
+                    ErrorConstants.CSV_PROCESSING_EMPTY_FILE_EXCEPTION_CODE, HttpStatus.BAD_REQUEST);
         }
 
         List<InvoiceDTO> uploadFileDTOS = invoiceService.uploadAndSave(file);
