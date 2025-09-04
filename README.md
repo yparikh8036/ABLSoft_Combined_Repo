@@ -1,7 +1,6 @@
 # 📄 Invoice Web Application
 
-This is a **Full-Stack Application** to upload and view invoice records.  
-The application supports uploading a CSV file containing invoice data, which is then stored in a **MySQL** database and displayed via a modern **Angular web UI**.
+This is a **Full-Stack Application** to upload and view invoice records. The application supports uploading a CSV file containing invoice data, which is then stored in a **MySQL** database and displayed via a modern **Angular web UI**.
 
 ---
 
