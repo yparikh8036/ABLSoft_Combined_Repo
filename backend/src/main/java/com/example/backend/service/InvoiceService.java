@@ -1,0 +1,178 @@
+package com.example.backend.service;
+
+import com.example.backend.domain.Invoice;
+import com.example.backend.repository.InvoiceRepo;
+import com.example.backend.service.dto.InvoiceDTO;
+import com.example.backend.service.mapper.InvoiceMapper;
+import com.example.backend.service.errors.ErrorConstants;
+import com.example.backend.service.errors.GlobalException;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Service layer for managing Invoice entities and CSV import operations.
+ * <p>
+ * Responsibilities include:
+ * - Persisting single records (via DTO or entity) while preventing duplicates.
+ * - Retrieving records (all or by id).
+ * - Parsing and persisting records from an uploaded CSV file.
+ * </p>
+ */
+@Service
+public class InvoiceService {
+    private final Logger log = LoggerFactory.getLogger(InvoiceService.class);
+
+    private final InvoiceRepo invoiceRepo;
+
+    private final InvoiceMapper invoiceMapper;
+
+    /**
+     * Constructs the service with the required repository and mapper dependencies.
+     *
+     * @param invoiceRepo   repository for persistence operations
+     * @param invoiceMapper mapper to convert between entity and DTO
+     */
+    public InvoiceService(InvoiceRepo invoiceRepo, InvoiceMapper invoiceMapper) {
+        this.invoiceRepo = invoiceRepo;
+        this.invoiceMapper = invoiceMapper;
+    }
+
+    /**
+     * Saves an Invoice represented as a DTO.
+     *
+     * @param invoiceDTO the data transfer object containing Invoice fields
+     * @return the persisted Invoice converted back to a DTO
+     * @throws GlobalException if a duplicate (customerId + invoiceNum) is detected
+     */
+    public InvoiceDTO save(InvoiceDTO invoiceDTO) {
+        log.debug("Request to save upload Invoice DTO : {}", invoiceDTO);
+
+        if (checkDuplicate(invoiceDTO.getCustomerId(), invoiceDTO.getInvoiceNum())) {
+            throw new GlobalException(ErrorConstants.DUPLICATE_INVOICE_EXCEPTION_MESSAGE, ErrorConstants.DUPLICATE_INVOICE_EXCEPTION_CODE, HttpStatus.BAD_REQUEST);
+        }
+        Invoice invoice = invoiceMapper.toEntity(invoiceDTO);
+        invoice = invoiceRepo.save(invoice);
+        return invoiceMapper.toDto(invoice);
+    }
+
+    /**
+     * Checks if an UploadFile already exists for the given composite key.
+     *
+     * @param customerId the customer identifier
+     * @param invoiceNum the invoice number
+     * @return true if a record exists with the same customerId and invoiceNum; false otherwise
+     */
+    private boolean checkDuplicate(String customerId, String invoiceNum) {
+        return invoiceRepo.existsByCustomerIdAndInvoiceNum(customerId, invoiceNum);
+    }
+
+    /**
+     * Retrieves all Invoice records.
+     *
+     * @return a list of InvoiceDTOs for all persisted records
+     */
+    public List<InvoiceDTO> findAll() {
+        log.debug("Request to get all Invoicex");
+        return invoiceRepo.findAll()
+                .stream()
+                .map(invoiceMapper::toDto)
+                .toList();
+    }
+
+    /**
+     * Parses an uploaded CSV file and persists non-duplicate records.
+     * <p>
+     * The CSV is expected to contain a header with the following columns:
+     * customerId, invoiceNum, date, description, amount.
+     * Duplicate rows (by customerId + invoiceNum) are filtered out before saving.
+     * </p>
+     *
+     * @param file multipart CSV file to parse
+     * @return list of persisted UploadFileDTOs corresponding to non-duplicate rows
+     * @throws RuntimeException if CSV parsing fails or input cannot be read
+     */
+    public List<InvoiceDTO> uploadAndSave(MultipartFile file) {
+        log.debug("Request to upload Invoice : {}", file.getName());
+
+        List<Invoice> invoices = new ArrayList<>();
+
+        try {
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+
+            reader.mark(1);
+            String headerLine = reader.readLine();
+            reader.reset();
+
+            char delimiter = getDelimiter(headerLine);
+
+            CSVParser csvParser = new CSVParser(reader,
+                    CSVFormat.newFormat(delimiter).withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
+
+            for (CSVRecord csvRecord : csvParser) {
+
+                Invoice invoice = new Invoice();
+                invoice.setCustomerId(csvRecord.get("customerId"));
+                invoice.setInvoiceNum(csvRecord.get("invoiceNum"));
+                invoice.setDate(csvRecord.get("date"));
+                invoice.setDescription(csvRecord.get("description"));
+                invoice.setAmount(Float.parseFloat(csvRecord.get("amount")));
+                invoices.add(invoice);
+            }
+
+        } catch (Exception e) {
+            throw new GlobalException(ErrorConstants.CSV_PROCESSING_EXCEPTION_MESSAGE,
+                    ErrorConstants.CSV_PROCESSING_EXCEPTION_CODE, HttpStatus.BAD_REQUEST);
+        }
+
+        return saveUploadedFiles(invoices);
+    }
+
+    private static char getDelimiter(String headerLine) {
+        if (headerLine == null || headerLine.isEmpty()) {
+            throw new GlobalException(ErrorConstants.CSV_PROCESSING_NULL_HEADER_EXCEPTION_MESSAGE,
+                    ErrorConstants.CSV_PROCESSING_NULL_HEADER_EXCEPTION_CODE, HttpStatus.BAD_REQUEST);
+        }
+
+        char delimiter;
+        if (headerLine.contains("\t")) {
+            delimiter = '\t'; // Tab
+        } else if (headerLine.contains(",")) {
+            delimiter = ',';  // Comma
+        } else if (headerLine.contains(";")) {
+            delimiter = ';';  // Semicolon
+        } else {
+            throw new GlobalException(ErrorConstants.CSV_PROCESSING_NO_DELIMITER_EXCEPTION_MESSAGE,
+                    ErrorConstants.CSV_PROCESSING_NO_DELIMITER_EXCEPTION_CODE, HttpStatus.BAD_REQUEST);
+        }
+        return delimiter;
+    }
+
+    /**
+     * Persists the provided list of UploadFile entities after filtering out duplicates.
+     *
+     * @param invoices list of Invoice entities parsed from input
+     * @return list of DTOs for the records that were actually saved
+     */
+    private List<InvoiceDTO> saveUploadedFiles(List<Invoice> invoices) {
+        List<Invoice> filteredList = invoices
+                .stream()
+                .filter(uploadFile -> !checkDuplicate(uploadFile.getCustomerId(), uploadFile.getInvoiceNum()))
+                .toList();
+
+        return invoiceMapper.toDtos(invoiceRepo.saveAll(filteredList));
+    }
+
+}
