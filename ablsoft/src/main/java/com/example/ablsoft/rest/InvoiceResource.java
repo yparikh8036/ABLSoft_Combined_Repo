@@ -12,13 +12,13 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 /**
- * REST controller providing endpoints to manage upload file records and CSV imports.
+ * REST controller providing endpoints to manage Invoice records and CSV imports.
  *
  * Endpoints:
- * - POST /api/upload-file: Create a single UploadFile from JSON (no ID allowed).
- * - PUT  /api/upload-file: Update an existing UploadFile from JSON (ID required).
- * - GET  /api/files:       List all UploadFiles.
- * - GET  /api/files/{id}:  Retrieve a single UploadFile by id.
+ * - POST /api/upload-file: Create a single Invoice from JSON (no ID allowed).
+ * - PUT  /api/upload-file: Update an existing Invoice from JSON (ID required).
+ * - GET  /api/files:       List all Invoice.
+ * - GET  /api/files/{id}:  Retrieve a single Invoice by id.
  * - POST /api/upload:      Upload a CSV file (multipart/form-data) and persist non-duplicates.
  */
 @RestController
@@ -34,28 +34,28 @@ public class InvoiceResource {
     private final InvoiceService invoiceService;
 
     /**
-     * Creates a single UploadFile record from JSON.
+     * Creates a single Invoice record from JSON.
      *
      * Constraints:
      * - The incoming DTO must NOT contain an id; otherwise a 500 will be thrown by the generic Exception.
      *   Consider refining to a typed exception and handler if needed.
      *
-     * @param invoiceDTO the payload describing the upload file to persist
+     * @param invoiceDTO the payload describing the Invoice to persist
      * @return 200 OK with the persisted DTO
      * @throws Exception when the DTO contains an id (creation not allowed with id)
      */
     @PostMapping("/upload-file")
     public ResponseEntity<InvoiceDTO> upload(@RequestBody @Valid InvoiceDTO invoiceDTO) throws Exception {
-        log.debug("REST request to save upload file : {}", invoiceDTO);
+        log.debug("REST request to save Invoice : {}", invoiceDTO);
         if (invoiceDTO.getId() != null) {
-            throw new Exception("A new upload file cannot already have an ID");
+            throw new Exception("A new Invoice cannot already have an ID");
         }
         InvoiceDTO result = invoiceService.save(invoiceDTO);
         return ResponseEntity.ok(result);
     }
 
     /**
-     * Updates an existing UploadFile record.
+     * Updates an existing Invoice record.
      *
      * Requirements:
      * - The DTO must contain a non-null id.
@@ -66,28 +66,28 @@ public class InvoiceResource {
      */
     @PutMapping("/upload-file")
     public ResponseEntity<InvoiceDTO> update(@RequestBody @Valid InvoiceDTO invoiceDTO) throws Exception {
-        log.debug("REST request to update uploaded file : {}", invoiceDTO);
+        log.debug("REST request to update Invoice : {}", invoiceDTO);
 
         if (invoiceDTO.getId() == null) {
-            throw new Exception("A update uploaded file should have an ID");
+            throw new Exception("A updated Invoice should have an ID");
         }
         InvoiceDTO result = invoiceService.save(invoiceDTO);
         return ResponseEntity.ok(result);
     }
 
     /**
-     * Lists all UploadFile records.
+     * Lists all Invoice records.
      *
-     * @return array of UploadFileDTO
+     * @return array of InvoiceDTO
      */
     @GetMapping("/files")
     public List<InvoiceDTO> getAllFiles() {
-        log.debug("REST request to get all files");
+        log.debug("REST request to get all Invoices");
         return invoiceService.findAll();
     }
 
     /**
-     * Retrieves a single UploadFile by its id.
+     * Retrieves a single Invoice by its id.
      *
      * @param fileId primary key of the record
      * @return 200 OK with the DTO
@@ -109,7 +109,7 @@ public class InvoiceResource {
      */
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
     public ResponseEntity<List<InvoiceDTO>> uploadFile(@RequestParam("file") MultipartFile file) {
-        log.debug("Request to get file : {}", file.getName());
+        log.debug("Request to get Invoice : {}", file.getName());
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }

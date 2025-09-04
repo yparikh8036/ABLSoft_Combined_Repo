@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Service layer for managing UploadFile entities and CSV import operations.
+ * Service layer for managing Invoice entities and CSV import operations.
  * <p>
  * Responsibilities include:
  * - Persisting single records (via DTO or entity) while preventing duplicates.
@@ -51,31 +51,31 @@ public class InvoiceService {
     }
 
     /**
-     * Saves an UploadFile represented as a DTO.
+     * Saves an Invoice represented as a DTO.
      * <p>
      * The DTO is converted to an entity and delegated to {@link #save(Invoice)}
      * which enforces duplicate checks and persistence.
      * </p>
      *
-     * @param invoiceDTO the data transfer object containing UploadFile fields
-     * @return the persisted UploadFile converted back to a DTO
+     * @param invoiceDTO the data transfer object containing Invoice fields
+     * @return the persisted Invoice converted back to a DTO
      * @throws GlobalException if a duplicate (customerId + invoiceNum) is detected
      */
     public InvoiceDTO save(InvoiceDTO invoiceDTO) {
-        log.debug("Request to save upload file DTO : {}", invoiceDTO);
+        log.debug("Request to save upload Invoice DTO : {}", invoiceDTO);
 
         return save(invoiceMapper.toEntity(invoiceDTO));
     }
 
     /**
-     * Saves an UploadFile entity after validating it is not a duplicate.
+     * Saves an Invoice entity after validating it is not a duplicate.
      *
      * @param invoice the entity to be persisted
      * @return the persisted entity mapped to a DTO
-     * @throws GlobalException if an UploadFile with the same customerId and invoiceNum already exists
+     * @throws GlobalException if an Invoice with the same customerId and invoiceNum already exists
      */
     public InvoiceDTO save(Invoice invoice) {
-        log.debug("Request to save upload file : {}", invoice);
+        log.debug("Request to save Invoice  : {}", invoice);
 
         if (checkDuplicate(invoice.getCustomerId(), invoice.getInvoiceNum())) {
             throw new GlobalException(ErrorConstants.DUPLICATE_INVOICE_EXCEPTION_MESSAGE, ErrorConstants.DUPLICATE_INVOICE_EXCEPTION_CODE, HttpStatus.BAD_REQUEST);
@@ -97,12 +97,12 @@ public class InvoiceService {
     }
 
     /**
-     * Retrieves all UploadFile records.
+     * Retrieves all Invoice records.
      *
-     * @return a list of UploadFileDTOs for all persisted records
+     * @return a list of InvoiceDTOs for all persisted records
      */
     public List<InvoiceDTO> findAll() {
-        log.debug("Request to get all Files");
+        log.debug("Request to get all Invoicex");
         return invoiceRepo.findAll()
                 .stream()
                 .map(invoiceMapper::toDto)
@@ -110,10 +110,10 @@ public class InvoiceService {
     }
 
     /**
-     * Retrieves a single UploadFile by its id.
+     * Retrieves a single Invoice by its id.
      *
-     * @param fileId the primary key of the UploadFile
-     * @return the corresponding UploadFileDTO
+     * @param fileId the primary key of the Invoice
+     * @return the corresponding InvoiceDTO
      * @throws RuntimeException if no record exists for the provided id
      */
     public InvoiceDTO findById(Long fileId) {
@@ -167,7 +167,7 @@ public class InvoiceService {
     /**
      * Persists the provided list of UploadFile entities after filtering out duplicates.
      *
-     * @param invoices list of UploadFile entities parsed from input
+     * @param invoices list of Invoice entities parsed from input
      * @return list of DTOs for the records that were actually saved
      */
     private List<InvoiceDTO> saveUploadedFiles(List<Invoice> invoices) {
