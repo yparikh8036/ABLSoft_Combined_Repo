@@ -47,7 +47,8 @@ The CSV file used for uploading invoices must follow this format:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yparikh8036/ABLSoft_Combined_Repo.git
+   git clone https://github.com/yparikh8036/Invoice_App_Repo.git
+   
    cd ABLSoft_Combined_Repo
    ```
 
