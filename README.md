@@ -1,23 +1,25 @@
-# ABLSoft Combined Repo
+# 📄 InvoiceApp
 
-This repository combines the **ABLSoft** backend and frontend components into a unified development setup.
-
-## Repository Structure
-
-- `ablsoft/` – Backend components and services (e.g., API, business logic)
-- `frontend/` – Frontend application (web UI)
-- `docker-compose.yml` – Docker Compose configuration to orchestrate services together
+InvoiceApp is a **full-stack application** to upload and view invoice records.  
+The application supports uploading a CSV file containing invoice data, which is then stored in a **MySQL** database and displayed via a modern **Angular web UI**.
 
 ---
 
-## Getting Started
+## 🛠️ Tech Stack
+- **Backend:** Spring Boot (Java, REST API, JPA/Hibernate)
+- **Frontend:** Angular (Material UI, HTTP Client)
+- **Database:** MySQL
+- **Containerization:** Docker, Docker Compose
 
-### Prerequisites
+---
 
-Ensure you have the following installed:
-- [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/)
-- (Optional) Node.js and npm/yarn if you prefer running frontend locally
-- (Optional) Your preferred IDE or editor
+## 🚀 Features
+- 📤 Upload invoice records via CSV file
+- 📑 View paginated invoices
+- 🖥️ Frontend: Angular
+- ⚙️ Backend: Spring Boot (Java)
+- 🗄️ Database: MySQL
+- 🐳 Containerized using Docker & Docker Compose
 
 ---
 
@@ -40,16 +42,4 @@ Ensure you have the following installed:
 
 ---
 
-
-## Features
-
-- **Backend** (`ablsoft/`):
-  - RESTful API endpoints for asset-based lending workflows
-  - Borrowing Base calculations, data persistence, user authentication (update as needed)
-
-- **Frontend** (`frontend/`):
-  - User interface for loan data, dashboards, forms
-  - Real-time updates and responsive design
-
----
 
