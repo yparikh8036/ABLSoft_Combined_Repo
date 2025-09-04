@@ -1,6 +1,6 @@
-# 📄 InvoiceApp
+# 📄 Invoice Web Application
 
-InvoiceApp is a **full-stack application** to upload and view invoice records.  
+This is a **Full-Stack Application** to upload and view invoice records.  
 The application supports uploading a CSV file containing invoice data, which is then stored in a **MySQL** database and displayed via a modern **Angular web UI**.
 
 ---
@@ -15,7 +15,6 @@ The application supports uploading a CSV file containing invoice data, which is 
 
 ## 🚀 Features
 - 📤 Upload invoice records via CSV file
-- 📑 View paginated invoices
 - 🖥️ Frontend: Angular
 - ⚙️ Backend: Spring Boot (Java)
 - 🗄️ Database: MySQL
@@ -37,8 +36,8 @@ The application supports uploading a CSV file containing invoice data, which is 
    ```
 
 3. Access the applications:
-   - Backend API: `http://localhost:<backend-port>`
-   - Frontend UI: `http://localhost:<frontend-port>`
+   - Backend API: `http://localhost:8080`
+   - Frontend UI: `http://localhost:4200`
 
 ---
 
